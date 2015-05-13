@@ -1,21 +1,34 @@
+%%
 %  ---------------------------------------------------------------------
-%  Classification of Forest Cover Types by using Neural Networks
+%  Machine Learning : Classification of Forest Cover Types by using Neural Networks.
 %  ---------------------------------------------------------------------
+%
+%   Copyright (c) 2015 Stefan Contiu (stefan.contiu@gmail.com)
+%   Published under MIT License, http://opensource.org/licenses/MIT.
 % 
-%  TODO : add link to src of data set. Put smthg on overall context.
-
+% 
+%  About:
+%   TODO : add some overall info. refs to data source, kaggle, andrew ng.
+% 
+%%
 clear; close all; clc
+
+% Data files : TODO
+trainingSetCsvFile = '';
+validationSetCsvFile = '';
+testSetCsvFile = '';
+submissionCsvFile = '';
 
 % Parameters
 input_layer_size  = 54;   % 54 input features 
-hidden_layer_size = 25;   % 25 hidden units
-forest_covers = 7;       % prev num_labels
+hidden_layer_size = 30;   % 25 hidden units
+forest_covers = 7;        % 7 output nodes coresponding to the 7 classes
 
 %  ---------------------------------------------------------------------
 %  Load Data
 %  ---------------------------------------------------------------------
 fprintf('Loading Training Data ...\n')
-X = csvread('f:\edu\Kaggle\Forest Cover Type Prediction\Data\train.csv');
+X = csvread('f:\edu\Kaggle\Forest Cover Type Prediction\Data\s_train.csv');
 
 % remove first row (features names) and first column (ids)
 X(1,:) = [];
@@ -40,10 +53,10 @@ initial_nn_params = [initial_Theta1(:) ; initial_Theta2(:)];
 %  ---------------------------------------------------------------------
 fprintf('\nTraining Neural Network... \n')
 
-options = optimset('MaxIter', 50); % try different values for 50
+options = optimset('MaxIter', 500); % try different values for 50
 
 %  should also try different values of lambda
-lambda = 1;
+lambda = 0.5;
 
 % Create "short hand" for the cost function to be minimized
 costFunction = @(p) nnCostFunction(p, ...
@@ -63,9 +76,26 @@ Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):en
                  forest_covers, (hidden_layer_size + 1));
 
 %  ---------------------------------------------------------------------
-%  Predict
+%  Computing Accuracy
 %  ---------------------------------------------------------------------
-                 
 pred = predict(Theta1, Theta2, X);
-
 fprintf('\nTraining Set Accuracy: %f\n', mean(double(pred == y)) * 100);
+
+validX = csvread('f:\edu\Kaggle\Forest Cover Type Prediction\Data\s_valid.csv');
+validX(:,1) = [];
+validXlastColumnIndex = size(validX, 2);
+validY = validX(:,validXlastColumnIndex);
+validX(:,validXlastColumnIndex) = [];
+validPred = predict(Theta1, Theta2, validX);
+fprintf('\nValidation Set Accuracy: %f\n', mean(double(validPred == validY)) * 100);
+
+%  ---------------------------------------------------------------------
+%  Construct the submission
+%  ---------------------------------------------------------------------
+%testx = csvread('f:\edu\kaggle\forest cover type prediction\data\test.csv');
+%testx(1,:) = [];
+%ids = testx(:,1);
+%testx(:,1) = [];
+%results = predict(theta1, theta2, testx);
+%results = [ids results];
+%csvwrite('f:\edu\kaggle\forest cover type prediction\data\octave.csv', results);
